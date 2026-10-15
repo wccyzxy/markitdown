@@ -192,7 +192,7 @@ def _extract_form_content_from_words(page: Any) -> str | None:
     # This gives us the global column structure
     all_table_x_positions: list[float] = []
     for info in row_info:
-        if info["num_columns"] >= 3 and not info["is_paragraph"]:
+        if info["num_columns"] >= 2 and not info["is_paragraph"]:
             all_table_x_positions.extend(info["x_groups"])
 
     if not all_table_x_positions:
@@ -258,6 +258,7 @@ def _extract_form_content_from_words(page: Any) -> str | None:
 
     # Now classify each row as table row or not
     # A row is a table row if it has words that align with 2+ of the global columns
+    num_cols = 0
     for info in row_info:
         if info["is_paragraph"]:
             info["is_table_row"] = False
@@ -278,6 +279,7 @@ def _extract_form_content_from_words(page: Any) -> str | None:
                     break
 
         # If row uses 2+ of the established columns, it's a table row
+        num_cols = max(num_cols, len(aligned_columns))
         info["is_table_row"] = len(aligned_columns) >= 2
 
     # Find table regions (consecutive table rows)
@@ -300,7 +302,7 @@ def _extract_form_content_from_words(page: Any) -> str | None:
 
     # Build output - collect table data first, then format with proper column widths
     result_lines: list[str] = []
-    num_cols = len(global_columns)
+    # num_cols = len(global_columns)
 
     # Helper function to extract cells from a row
     def extract_cells(info: dict) -> list[str]:
